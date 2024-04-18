@@ -4,14 +4,19 @@ import {currentUserRouter} from "./routes/current-user.ts";
 import { signInRouter } from "./routes/signin.ts";
 import { signUpRouter } from "./routes/signup.ts";
 import { signOutRouter } from "./routes/signout.ts";
+import { errorHandler } from "./middlewares/error-handler.ts";
+
 
 const app = express();
 
 app.use(json());
 
+
 app.use(currentUserRouter);
 app.use(signInRouter);
 app.use(signOutRouter);
 app.use(signUpRouter);
+
+app.use(errorHandler)
 
 app.listen(3000, () => console.log("App is running on port 3000!"))
