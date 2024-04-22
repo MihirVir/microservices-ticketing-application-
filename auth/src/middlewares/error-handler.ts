@@ -1,7 +1,25 @@
-import { Request, Response, NextFunction } from "express"; 
+import { Request, Response, NextFunction } from "express";
+import { RequestValidationError } from "../errors/request-validation-error.ts";
+import { DatabaseConnectionError } from "../errors/database-connection-error.ts";
 
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.log('Something went wrong', err.message);
+export const errorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (err instanceof RequestValidationError) {
+    const formattedErrors = err.errors.map((error) => {
+      if (error.type === "field") {
+        return { message: error.msg, field: error.path };
+      }
+    });
+    return res.status(400).send({ errors: formattedErrors });
+  }
 
-  res.status(400).send({ message: err.message })
-}
+  if (err instanceof DatabaseConnectionError) {
+    return res.status(500).send({ errors: [{ message: err.reason }] });
+  }
+
+  res.status(400).send({ errors: [{ message: "Something Went Wrong" }] });
+};
